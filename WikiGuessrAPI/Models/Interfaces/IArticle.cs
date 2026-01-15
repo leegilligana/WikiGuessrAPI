@@ -1,6 +1,5 @@
-﻿namespace WikiGuessrAPI.Models.Interfaces
+﻿namespace WikiGuessrAPI.Models.Interfaces;
+
+internal interface IArticle
 {
-    public interface IArticle
-    {
-    }
 }

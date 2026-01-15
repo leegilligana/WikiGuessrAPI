@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="stylecop.json" />
+  </Folder>
   <Project Path="WikiGuessrAPI/WikiGuessrAPI.csproj" />
   <Project Path="WikiGuessrAPITests/WikiGuessrAPITests.csproj" />
 </Solution>
