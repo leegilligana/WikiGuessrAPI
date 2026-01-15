@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WikiGuessrAPI/WikiGuessrAPI.csproj" />
+  <Project Path="WikiGuessrAPITests/WikiGuessrAPITests.csproj" />
+</Solution>

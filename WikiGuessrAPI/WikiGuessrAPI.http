@@ -1,0 +1,6 @@
+@WikiGuessrAPI_HostAddress = http://localhost:5022
+
+GET {{WikiGuessrAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
