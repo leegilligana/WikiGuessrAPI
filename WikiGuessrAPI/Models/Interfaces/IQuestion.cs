@@ -8,11 +8,13 @@ internal interface IQuestion
 
     public int AnswerId { get; init; }
 
+    public int ArticleId { get; init; }
+
     public float Latitude { get; init; }
 
     public float Longitude { get; init; }
 
-    public string? Url { get; init; }
+    public Enums.QuestionType Type { get; init; }
 
     public int? Difficulty { get; init; }
 }
