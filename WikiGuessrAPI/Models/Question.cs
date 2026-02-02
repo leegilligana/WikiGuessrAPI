@@ -1,8 +1,8 @@
-﻿namespace WikiGuessrAPI.Models.Interfaces;
+﻿namespace WikiGuessrAPI.Models;
 
-internal interface IQuestion
+internal class Question
 {
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     public int Id { get; init; }
 

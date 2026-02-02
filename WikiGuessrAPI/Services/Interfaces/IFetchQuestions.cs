@@ -1,8 +1,8 @@
-﻿using WikiGuessrAPI.Models.Interfaces;
+﻿using WikiGuessrAPI.Models;
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
 internal interface IFetchQuestions
 {
-    public Task<IQuestion> FetchQuestion(int id);
+    public Task<Question> FetchQuestionAsync(int id);
 }

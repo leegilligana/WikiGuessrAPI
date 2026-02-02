@@ -1,8 +1,8 @@
 ﻿namespace WikiGuessrAPI.Models;
 
-internal class GuessSubmission
+public class GuessSubmission
 {
-    public int PlayerId { get; init; }
+    public Guid PlayerId { get; init; }
 
     public double Latitude { get; init; }
 

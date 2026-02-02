@@ -2,5 +2,5 @@
 
 internal interface ICheckIfPlayerNameIsAppropriate
 {
-    public Task<bool> CheckIfPlayerNameIsAppropriate(string playerName);
+    public Task<bool> CheckIfPlayerNameIsAppropriateAsync(string playerName);
 }

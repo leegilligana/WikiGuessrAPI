@@ -2,5 +2,5 @@
 
 internal interface IDealWithOldSessions
 {
-    public Task RemoveOldSessions();
+    public Task RemoveOldSessionsAsync();
 }

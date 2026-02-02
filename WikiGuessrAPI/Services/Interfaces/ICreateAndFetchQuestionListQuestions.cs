@@ -1,10 +1,10 @@
-﻿using WikiGuessrAPI.Models.Interfaces;
+﻿using WikiGuessrAPI.Models;
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
 internal interface ICreateAndFetchQuestionListQuestions
 {
-    public Task<IEnumerable<IQuestion>> FetchQuestionsInList(Guid questionListSeed);
+    public Task<IEnumerable<Question>> FetchQuestionsListAsync(Guid questionListSeed);
 
-    public Task<IQuestion> FetchQuestionInList(Guid questionListSeed, int questionNumber);
+    public Task<Question> FetchQuestionFromListSeedAsync(Guid questionListSeed, int questionNumber);
 }

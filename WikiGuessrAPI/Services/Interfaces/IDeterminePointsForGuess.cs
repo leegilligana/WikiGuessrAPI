@@ -1,8 +1,8 @@
-﻿using WikiGuessrAPI.Models.Interfaces;
+﻿using WikiGuessrAPI.Models;
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
 internal interface IDeterminePointsForGuess
 {
-    public Task<int> DeterminePointsForGuess(IGuess guess, IAnswer answer);
+    public Task<int> DeterminePointsForGuess(Guess guess, Answer answer);
 }

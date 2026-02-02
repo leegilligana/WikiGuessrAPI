@@ -5,7 +5,7 @@ namespace WikiGuessrAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-internal class GuessController : ControllerBase
+public class GuessController : ControllerBase
 {
     [HttpPost(Name = "PostGuess")]
     public ActionResult PostGuess([FromBody] GuessSubmission guess) => Ok();

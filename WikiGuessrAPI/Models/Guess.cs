@@ -1,6 +1,6 @@
-﻿namespace WikiGuessrAPI.Models.Interfaces;
+﻿namespace WikiGuessrAPI.Models;
 
-internal interface IGuess
+internal class Guess
 {
     public float Latitude { get; init; }
 
