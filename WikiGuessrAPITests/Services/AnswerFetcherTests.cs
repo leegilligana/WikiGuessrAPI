@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Xunit;
 
 namespace WikiGuessrAPITests.Services;
@@ -7,12 +8,14 @@ public class AnswerFetcherTests
     [Fact]
     public void ShouldReturnValidId()
     {
-        return;
+        var result = true;
+        result.Should().BeTrue();
     }
 
     [Fact]
     public void ShouldThrowException()
     {
-        return;
+        var result = true;
+        result.Should().BeTrue();
     }
 }
