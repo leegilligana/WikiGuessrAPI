@@ -11,15 +11,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.12.24" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="WikiGuessrAPI.Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Interfaces\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
