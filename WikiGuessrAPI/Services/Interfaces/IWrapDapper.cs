@@ -8,7 +8,7 @@ internal interface IWrapDapper
 
     public Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null);
 
-    public Task<T> QueryFirstOrDefaultAsync<T>(string sql, object? param = null);
-
     public Task ExecuteInTransactionAsync(Func<IDbTransaction, Task> action);
+
+    public Task<T> QuerySingleAsync<T>(string sql, object? param = null);
 }

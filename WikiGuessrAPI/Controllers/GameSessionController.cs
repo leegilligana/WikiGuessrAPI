@@ -7,6 +7,6 @@ namespace WikiGuessrAPI.Controllers;
 [ApiController]
 public class GameSessionController : ControllerBase
 {
-    [HttpPost(Name = "PostGuess")]
+    [HttpPost(Name = "JoinGame")]
     public ActionResult<string> JoinGame(string? gameCode) => Ok(gameCode);
 }
