@@ -5,7 +5,7 @@ using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-internal class DapperWrapper(string connectionString) : IWrapDapper
+public class DapperWrapper(string connectionString) : IWrapDapper
 {
     private readonly string connectionString = connectionString;
 

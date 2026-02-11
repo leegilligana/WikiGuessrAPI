@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface IDeterminePointsForGuess
+public interface IDeterminePointsForGuess
 {
     public Task<int> DeterminePointsForGuess(Guess guess, Answer answer);
 }

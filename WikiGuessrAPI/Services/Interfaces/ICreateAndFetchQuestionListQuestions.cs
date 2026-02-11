@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface ICreateAndFetchQuestionListQuestions
+public interface ICreateAndFetchQuestionListQuestions
 {
     public Task<IEnumerable<Question>> FetchQuestionsListAsync(Guid questionListSeed);
 

@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Models;
 
-internal class GameUpdate
+public class GameUpdate
 {
     public required Dictionary<string, int> Leaderboard { get; init; }
 

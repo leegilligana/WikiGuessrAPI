@@ -1,6 +1,6 @@
 ﻿namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface ICheckIfPlayerNameIsAppropriate
+public interface ICheckIfPlayerNameIsAppropriate
 {
     public Task<bool> CheckIfPlayerNameIsAppropriateAsync(string playerName);
 }

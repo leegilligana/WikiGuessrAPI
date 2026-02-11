@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface IWrapDapper
+public interface IWrapDapper
 {
     public Task<int> ExecuteAsync(string sql, object? param = null);
 

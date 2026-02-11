@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface IFetchQuestions
+public interface IFetchQuestions
 {
     public Task<Question> FetchQuestionAsync(int id);
 }

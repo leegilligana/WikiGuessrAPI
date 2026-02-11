@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="WikiGuessrAPI.Tests" />
+    <publicsVisibleTo Include="WikiGuessrAPI.Tests" />
   </ItemGroup>
 
 </Project>

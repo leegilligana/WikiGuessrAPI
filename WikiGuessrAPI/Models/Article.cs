@@ -1,5 +1,5 @@
 ﻿namespace WikiGuessrAPI.Models;
 
-internal class Article
+public class Article
 {
 }

@@ -1,6 +1,6 @@
 ﻿namespace WikiGuessrAPI.Models;
 
-internal class Question
+public class Question
 {
     public required string Name { get; init; }
 

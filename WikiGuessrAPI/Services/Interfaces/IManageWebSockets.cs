@@ -1,6 +1,6 @@
 ﻿namespace WikiGuessrAPI.Services.Interfaces;
 
-internal interface IManageWebSockets
+public interface IManageWebSockets
 {
     public Task SendMessageToAllPlayersInSessionAsync(Guid gameSessionSeed, string message);
 
