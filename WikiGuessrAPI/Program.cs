@@ -22,6 +22,8 @@ builder.Services.AddOpenApi();
 
 // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<IWrapDapper>(new DapperWrapper(string.Empty));
+builder.Services.AddScoped<IRedisCache, RedisCache>();
+builder.Services.AddScoped<IManageGameSessions, GameSessionService>();
 
 var app = builder.Build();
 
