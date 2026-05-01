@@ -5,7 +5,7 @@ namespace WikiGuessrAPI.Services;
 
 public class GameSessionService(
     ILogger<GameSessionService> logger,
-    IRedisCache redisCache) : IManageGameSessions
+    ICacheAndRetrieveGameSessions redisCache) : IManageGameSessions
 {
     public async Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId)
     {
@@ -25,7 +25,7 @@ public class GameSessionService(
         await AddPlayerToSessionAsync(sessionId, playerId);
     }
 
-    public async Task CreateNewGameSessionAsync(int numberOfQuestions)
+    public async Task CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName)
     {
         LoggingEvents.LogNewSessionAttempt(logger, numberOfQuestions);
 
@@ -34,14 +34,19 @@ public class GameSessionService(
             throw new ArgumentException("Number of questions must be between 1 and 20");
         }
 
+        var hostGuid = Guid.NewGuid();
         var session = new Session
         {
             Id = Guid.NewGuid(),
             Seed = Guid.NewGuid(),
             PlayerScores = new()
-        {
-            { Guid.NewGuid(), ("player1", 0) },
-        },
+            {
+                { hostGuid, 0 },
+            },
+            PlayerNames = new()
+            {
+                { hostGuid, hostPlayerName },
+            },
             Round = 0,
             RoundLimit = numberOfQuestions,
         };
@@ -51,9 +56,16 @@ public class GameSessionService(
         LoggingEvents.LogNewSessionSuccess(logger, session.Id, session.PlayerScores.Keys.First());
     }
 
+    public async Task IncrementSessionScoreboardAsync(Session session, Dictionary<Guid, int> increases)
+    {
+
+    }
+
     public async Task<bool> DoesGameSessionExistAsync(Guid sessionId) => await redisCache.CheckIfSessionExistsAsync(sessionId);
 
-    public async Task<Dictionary<Guid, (string PlayerName, int Score)>> GetPlayerScoresAsync(Guid sessionId) => (await redisCache.GetSessionAsync(sessionId)).PlayerScores;
+    public async Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId) => (await redisCache.GetSessionAsync(sessionId)).PlayerScores;
+
+    public async Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId) => (await redisCache.GetSessionAsync(sessionId)).PlayerNames;
 
     public async Task DeleteSessionIfExistsAsync(Guid sessionId) => await redisCache.DeleteSessionAsync(sessionId);
 
@@ -61,15 +73,8 @@ public class GameSessionService(
     {
         LoggingEvents.LogKickPlayer(logger, playerId, sessionId);
 
-        var session = await redisCache.GetSessionAsync(sessionId);
-
-        if (!session.PlayerScores.ContainsKey(playerId))
-        {
-            throw new InvalidOperationException("Player is not in session");
-        }
-
-        session.PlayerScores.Remove(playerId);
-
-        await redisCache.UpdateSessionAsync(session);
+        await redisCache.RemovePlayerFromSession(sessionId, playerId);
     }
+
+    public Task CreateNewGameSessionAsync(int numberOfQuestions) => throw new NotImplementedException();
 }

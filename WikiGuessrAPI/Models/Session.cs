@@ -6,7 +6,9 @@ public class Session
 
     public Guid Seed { get; init; }
 
-    public required Dictionary<Guid, (string Name, int Score)> PlayerScores { get; init; }
+    public required Dictionary<Guid, int> PlayerScores { get; init; }
+
+    public required Dictionary<Guid, string> PlayerNames { get; init; }
 
     public int Round { get; init; }
 

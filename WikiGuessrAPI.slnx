@@ -4,6 +4,9 @@
     <File Path="Directory.Build.props" />
     <File Path="stylecop.json" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
   <Project Path="WikiGuessrAPI/WikiGuessrAPI.csproj" />
   <Project Path="WikiGuessrAPITests/WikiGuessrAPITests.csproj" />
 </Solution>

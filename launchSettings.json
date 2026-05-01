@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://localhost:{ServicePort}/scalar/v1",
+      "serviceActions": {
+        "wiki-api": "StartDebugging"
+      }
+    }
+  }
+}

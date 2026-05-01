@@ -15,7 +15,7 @@ public class GameSessionServiceTests
     [Fact]
     public async Task AddPlayerToFullSession()
     {
-        var redisCacheMock = new Mock<IRedisCache>();
+        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
@@ -23,10 +23,17 @@ public class GameSessionServiceTests
             Id = Guid.NewGuid(),
             PlayerScores = new()
             {
-                { Guid.NewGuid(), ("player", 0) },
-                { Guid.NewGuid(), ("player", 0) },
-                { Guid.NewGuid(), ("player", 0) },
-                { Guid.NewGuid(), ("player", 0) },
+                { Guid.NewGuid(), 0 },
+                { Guid.NewGuid(), 0 },
+                { Guid.NewGuid(), 0 },
+                { Guid.NewGuid(), 0 },
+            },
+            PlayerNames = new()
+            {
+                { Guid.NewGuid(), "Player1" },
+                { Guid.NewGuid(), "Player2" },
+                { Guid.NewGuid(), "Player3" },
+                { Guid.NewGuid(), "Player4" },
             },
         };
 
@@ -46,7 +53,7 @@ public class GameSessionServiceTests
     public async Task AddDuplicatePlayerToSession()
     {
         var duplicateGuid = Guid.NewGuid();
-        var redisCacheMock = new Mock<IRedisCache>();
+        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
@@ -54,9 +61,15 @@ public class GameSessionServiceTests
             Id = Guid.NewGuid(),
             PlayerScores = new()
             {
-                { duplicateGuid, ("player", 0) },
-                { Guid.NewGuid(), ("player", 0) },
-                { Guid.NewGuid(), ("player", 0) },
+                { duplicateGuid, 0 },
+                { Guid.NewGuid(), 0 },
+                { Guid.NewGuid(), 0 },
+            },
+            PlayerNames = new()
+            {
+                { duplicateGuid, "Player1" },
+                { Guid.NewGuid(), "Player2" },
+                { Guid.NewGuid(), "Player3" },
             },
         };
 
@@ -79,7 +92,7 @@ public class GameSessionServiceTests
     [InlineData(100, true, false)]
     public async Task CreateNewGameTest(int numQuestions, bool invalidQuestionCount, bool redisError)
     {
-        var redisCacheMock = new Mock<IRedisCache>();
+        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
 
@@ -95,12 +108,12 @@ public class GameSessionServiceTests
 
         if (invalidQuestionCount || redisError)
         {
-            var act = async () => await gameSessionService.CreateNewGameSessionAsync(numQuestions);
+            var act = async () => await gameSessionService.CreateNewGameSessionAsync(numQuestions, "Rosetta");
             await act.Should().ThrowAsync<ArgumentException>();
         }
         else
         {
-            await gameSessionService.CreateNewGameSessionAsync(numQuestions);
+            await gameSessionService.CreateNewGameSessionAsync(numQuestions, "Eevee");
             redisCacheMock.Verify(x => x.AddSessionToCacheAsync(It.Is<Session>(s => s.RoundLimit == numQuestions)), Times.Once);
         }
 
@@ -117,7 +130,7 @@ public class GameSessionServiceTests
     [InlineData(false)]
     public async Task KickPlayerTest(bool playerFound)
     {
-        var redisCacheMock = new Mock<IRedisCache>();
+        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
 
@@ -127,10 +140,17 @@ public class GameSessionServiceTests
             Id = Guid.NewGuid(),
             PlayerScores = new()
             {
-                { toxicPlayer, ("bad player", 999) },
-                { Guid.NewGuid(), ("player", 800) },
-                { Guid.NewGuid(), ("player", 323) },
-                { Guid.NewGuid(), ("player", 0) },
+                { toxicPlayer, 999 },
+                { Guid.NewGuid(), 000 },
+                { Guid.NewGuid(), 323 },
+                { Guid.NewGuid(), 0 },
+            },
+            PlayerNames = new()
+            {
+                { toxicPlayer, "ToxicPlayer" },
+                { Guid.NewGuid(), "Player2" },
+                { Guid.NewGuid(), "Player3" },
+                { Guid.NewGuid(), "Player4" },
             },
         };
 

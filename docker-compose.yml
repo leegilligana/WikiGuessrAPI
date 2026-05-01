@@ -1,0 +1,11 @@
+services:
+  wiki-api:
+    image: ${DOCKER_REGISTRY-}wiki-api
+    build:
+      context: .
+      dockerfile: WikiGuessrAPI/Dockerfile
+    depends_on:
+      - wiki-cache
+
+  wiki-cache:
+    image: redis:latest

@@ -8,7 +8,9 @@ public interface IManageGameSessions
 
     public Task RemovePlayerFromSessionAsync(Guid sessionId, Guid playerId);
 
-    public Task<Dictionary<Guid, (string PlayerName, int Score)>> GetPlayerScoresAsync(Guid sessionId);
+    public Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId);
+
+    public Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId);
 
     public Task CreateNewGameSessionAsync(int numberOfQuestions);
 
