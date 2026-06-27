@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WikiGuessrAPI.Models;
 
 namespace WikiGuessrAPI.Controllers;
 

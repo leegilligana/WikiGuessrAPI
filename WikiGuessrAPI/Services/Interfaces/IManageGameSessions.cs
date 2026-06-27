@@ -2,7 +2,17 @@
 
 public interface IManageGameSessions
 {
-    public Task<Guid> CreateNewGameSessionAsync(int numberOfQuestions, int timePerQuestionInSeconds);
+    public Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId);
 
-    public Task<bool> DoesGameSessionExistAsync(Guid gameSessionSeed);
+    public Task DeleteSessionIfExistsAsync(Guid sessionId);
+
+    public Task RemovePlayerFromSessionAsync(Guid sessionId, Guid playerId);
+
+    public Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId);
+
+    public Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId);
+
+    public Task CreateNewGameSessionAsync(int numberOfQuestions);
+
+    public Task<bool> DoesGameSessionExistAsync(Guid sessionId);
 }
