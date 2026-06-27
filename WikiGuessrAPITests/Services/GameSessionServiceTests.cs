@@ -15,7 +15,7 @@ public class GameSessionServiceTests
     [Fact]
     public async Task AddPlayerToFullSession()
     {
-        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
+        var redisCacheMock = new Mock<IManageCachedSessionInfo>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
@@ -37,7 +37,7 @@ public class GameSessionServiceTests
             },
         };
 
-        redisCacheMock.Setup(x => x.GetSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
+        redisCacheMock.Setup(x => x.FetchSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
         loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
         var playerGuid = Guid.NewGuid();
@@ -53,7 +53,7 @@ public class GameSessionServiceTests
     public async Task AddDuplicatePlayerToSession()
     {
         var duplicateGuid = Guid.NewGuid();
-        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
+        var redisCacheMock = new Mock<IManageCachedSessionInfo>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
@@ -73,7 +73,7 @@ public class GameSessionServiceTests
             },
         };
 
-        redisCacheMock.Setup(x => x.GetSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
+        redisCacheMock.Setup(x => x.FetchSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
         loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
         var act = async () => await gameSessionService.AddPlayerToSessionAsync(Guid.NewGuid(), duplicateGuid);
@@ -92,7 +92,7 @@ public class GameSessionServiceTests
     [InlineData(100, true, false)]
     public async Task CreateNewGameTest(int numQuestions, bool invalidQuestionCount, bool redisError)
     {
-        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
+        var redisCacheMock = new Mock<IManageCachedSessionInfo>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
 
@@ -130,7 +130,7 @@ public class GameSessionServiceTests
     [InlineData(false)]
     public async Task KickPlayerTest(bool playerFound)
     {
-        var redisCacheMock = new Mock<ICacheAndRetrieveGameSessions>();
+        var redisCacheMock = new Mock<IManageCachedSessionInfo>();
         var loggerMock = new Mock<ILogger<GameSessionService>>();
         var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
 
@@ -155,7 +155,7 @@ public class GameSessionServiceTests
         };
 
         loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
-        redisCacheMock.Setup(x => x.GetSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
+        redisCacheMock.Setup(x => x.FetchSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
 
         if (playerFound)
         {

@@ -2,7 +2,7 @@
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-public interface ICacheAndRetrieveGameSessions
+public interface IManageCachedSessionInfo
 {
     public Task AddSessionToCacheAsync(Session session);
 
@@ -10,9 +10,9 @@ public interface ICacheAndRetrieveGameSessions
 
     public Task DeleteSessionAsync(Guid sessionId);
 
-    public Task<Session> GetSessionAsync(Guid sessionId);
+    public Task<Session?> FetchSessionAsync(Guid sessionId);
 
-    public Task<bool> IncrementPlayerScoreAndCheckIfAllPlayersAnswered(Guid sessionId, Guid playerId, int points);
+    public Task<bool> IncrementPlayerScoreAndCheckIfAllPlayersAnswered(Guid sessionId, Guid playerId, int points, int round);
 
     public Task RemovePlayerFromSession(Guid sessionId, Guid playerId);
 }

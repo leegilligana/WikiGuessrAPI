@@ -1,17 +1,19 @@
 ﻿using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Models.Exceptions;
 using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
 public class GameSessionService(
     ILogger<GameSessionService> logger,
-    ICacheAndRetrieveGameSessions redisCache) : IManageGameSessions
+    IManageCachedSessionInfo redisCache) : IManageGameSessions
 {
     public async Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId)
     {
         LoggingEvents.LogAddingPlayer(logger, playerId, sessionId);
 
-        var sessionPlayers = (await redisCache.GetSessionAsync(sessionId)).PlayerScores.Keys;
+        var sessionPlayers = (await redisCache.FetchSessionAsync(sessionId))?.PlayerScores?.Keys
+            ?? throw new SessionNotFoundException(sessionId);
 
         if (sessionPlayers.Contains(playerId))
         {
@@ -19,7 +21,7 @@ public class GameSessionService(
         }
         else if (sessionPlayers.Count >= 4)
         {
-            throw new InvalidOperationException("Session is full");
+            throw new SessionIsFullException(sessionId, playerId);
         }
 
         await AddPlayerToSessionAsync(sessionId, playerId);
@@ -63,9 +65,9 @@ public class GameSessionService(
 
     public async Task<bool> DoesGameSessionExistAsync(Guid sessionId) => await redisCache.CheckIfSessionExistsAsync(sessionId);
 
-    public async Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId) => (await redisCache.GetSessionAsync(sessionId)).PlayerScores;
+    public async Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId) => (await redisCache.FetchSessionAsync(sessionId)).PlayerScores;
 
-    public async Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId) => (await redisCache.GetSessionAsync(sessionId)).PlayerNames;
+    public async Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId) => (await redisCache.FetchSessionAsync(sessionId)).PlayerNames;
 
     public async Task DeleteSessionIfExistsAsync(Guid sessionId) => await redisCache.DeleteSessionAsync(sessionId);
 
