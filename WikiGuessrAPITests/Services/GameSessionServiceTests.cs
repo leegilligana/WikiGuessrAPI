@@ -16,8 +16,8 @@ public class GameSessionServiceTests
     public async Task AddPlayerToFullSession()
     {
         var redisCacheMock = new Mock<IManageCachedSessionInfo>();
-        var loggerMock = new Mock<ILogger<GameSessionService>>();
-        var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
+        var loggerMock = new Mock<ILogger<GameSessionManager>>();
+        var gameSessionService = new GameSessionManager(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
         {
             Id = Guid.NewGuid(),
@@ -54,8 +54,8 @@ public class GameSessionServiceTests
     {
         var duplicateGuid = Guid.NewGuid();
         var redisCacheMock = new Mock<IManageCachedSessionInfo>();
-        var loggerMock = new Mock<ILogger<GameSessionService>>();
-        var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
+        var loggerMock = new Mock<ILogger<GameSessionManager>>();
+        var gameSessionService = new GameSessionManager(loggerMock.Object, redisCacheMock.Object);
         var session = new Session
         {
             Id = Guid.NewGuid(),
@@ -93,8 +93,8 @@ public class GameSessionServiceTests
     public async Task CreateNewGameTest(int numQuestions, bool invalidQuestionCount, bool redisError)
     {
         var redisCacheMock = new Mock<IManageCachedSessionInfo>();
-        var loggerMock = new Mock<ILogger<GameSessionService>>();
-        var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
+        var loggerMock = new Mock<ILogger<GameSessionManager>>();
+        var gameSessionService = new GameSessionManager(loggerMock.Object, redisCacheMock.Object);
 
         loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
         if (redisError)
@@ -131,8 +131,8 @@ public class GameSessionServiceTests
     public async Task KickPlayerTest(bool playerFound)
     {
         var redisCacheMock = new Mock<IManageCachedSessionInfo>();
-        var loggerMock = new Mock<ILogger<GameSessionService>>();
-        var gameSessionService = new GameSessionService(loggerMock.Object, redisCacheMock.Object);
+        var loggerMock = new Mock<ILogger<GameSessionManager>>();
+        var gameSessionService = new GameSessionManager(loggerMock.Object, redisCacheMock.Object);
 
         var thisGuy = Guid.NewGuid();
         var session = new Session

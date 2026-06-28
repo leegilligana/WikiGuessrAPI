@@ -4,8 +4,8 @@ using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-public class GameSessionService(
-    ILogger<GameSessionService> logger,
+public class GameSessionManager(
+    ILogger<GameSessionManager> logger,
     IManageCachedSessionInfo redisCache) : IManageGameSessions
 {
     public async Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId)
