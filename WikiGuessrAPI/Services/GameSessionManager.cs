@@ -58,16 +58,15 @@ public class GameSessionManager(
         LoggingEvents.LogNewSessionSuccess(logger, session.Id, session.PlayerScores.Keys.First());
     }
 
-    public async Task IncrementSessionScoreboardAsync(Session session, Dictionary<Guid, int> increases)
-    {
-
-    }
-
     public async Task<bool> DoesGameSessionExistAsync(Guid sessionId) => await redisCache.CheckIfSessionExistsAsync(sessionId);
 
-    public async Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId) => (await redisCache.FetchSessionAsync(sessionId)).PlayerScores;
+    public async Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId) =>
+        (await redisCache.FetchSessionAsync(sessionId))?.PlayerScores
+        ?? throw new SessionNotFoundException(sessionId);
 
-    public async Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId) => (await redisCache.FetchSessionAsync(sessionId)).PlayerNames;
+    public async Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId) =>
+        (await redisCache.FetchSessionAsync(sessionId))?.PlayerNames
+        ?? throw new SessionNotFoundException(sessionId);
 
     public async Task DeleteSessionIfExistsAsync(Guid sessionId) => await redisCache.DeleteSessionAsync(sessionId);
 
@@ -78,5 +77,5 @@ public class GameSessionManager(
         await redisCache.RemovePlayerFromSession(sessionId, playerId);
     }
 
-    public Task CreateNewGameSessionAsync(int numberOfQuestions) => throw new NotImplementedException();
+    public async Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round) => await redisCache.IncrementPlayerScoreAndCheckIfAllPlayersAnswered(sessionId, playerId, scoreIncrease, round);
 }

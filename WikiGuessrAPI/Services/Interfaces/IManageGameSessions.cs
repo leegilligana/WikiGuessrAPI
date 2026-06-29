@@ -12,7 +12,9 @@ public interface IManageGameSessions
 
     public Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId);
 
-    public Task CreateNewGameSessionAsync(int numberOfQuestions);
+    public Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round);
+
+    public Task CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName);
 
     public Task<bool> DoesGameSessionExistAsync(Guid sessionId);
 }
