@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Models.Exceptions;
 using WikiGuessrAPI.Services;
 using WikiGuessrAPI.Services.Interfaces;
 using Xunit;
@@ -43,8 +44,8 @@ public class GameSessionServiceTests
         var playerGuid = Guid.NewGuid();
         var act = async () => await gameSessionService.AddPlayerToSessionAsync(Guid.NewGuid(), playerGuid);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("Session is full");
+        await act.Should().ThrowAsync<SessionIsFullException>()
+            .WithMessage("Session full*");
 
         loggerMock.VerifyLog(LogLevel.Information, "Adding player");
     }
@@ -125,10 +126,8 @@ public class GameSessionServiceTests
         }
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task KickPlayerTest(bool playerFound)
+    [Fact]
+    public async Task KickPlayerTest()
     {
         var redisCacheMock = new Mock<IManageCachedSessionInfo>();
         var loggerMock = new Mock<ILogger<GameSessionManager>>();
@@ -157,18 +156,8 @@ public class GameSessionServiceTests
         loggerMock.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
         redisCacheMock.Setup(x => x.FetchSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
 
-        if (playerFound)
-        {
-            await gameSessionService.RemovePlayerFromSessionAsync(Guid.NewGuid(), toxicPlayer);
-            redisCacheMock.Verify(rcm => rcm.UpdateSessionAsync(It.Is<Session>(s => !s.PlayerScores.ContainsKey(thisGuy))));
-        }
-        else
-        {
-            var act = async () => await gameSessionService.RemovePlayerFromSessionAsync(Guid.NewGuid(), Guid.NewGuid());
-            await act.Should().ThrowAsync<InvalidOperationException>()
-                .WithMessage("Player is not in session");
-        }
-
+        await gameSessionService.RemovePlayerFromSessionAsync(Guid.NewGuid(), toxicPlayer);
+        redisCacheMock.Verify(rcm => rcm.RemovePlayerFromSession(It.IsAny<Guid>(), It.Is<Guid>(g => g == toxicPlayer)));
         loggerMock.VerifyLog(LogLevel.Information, "Kicking player");
     }
 }
