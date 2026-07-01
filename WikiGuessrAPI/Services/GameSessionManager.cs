@@ -27,7 +27,7 @@ public class GameSessionManager(
         await AddPlayerToSessionAsync(sessionId, playerId);
     }
 
-    public async Task CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName)
+    public async Task<(Guid SessionGuid, Guid HostGuid)> CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName)
     {
         LoggingEvents.LogNewSessionAttempt(logger, numberOfQuestions);
 
@@ -37,9 +37,10 @@ public class GameSessionManager(
         }
 
         var hostGuid = Guid.NewGuid();
+        var sessionGuid = Guid.NewGuid();
         var session = new Session
         {
-            Id = Guid.NewGuid(),
+            Id = sessionGuid,
             Seed = Guid.NewGuid(),
             PlayerScores = new()
             {
@@ -56,6 +57,8 @@ public class GameSessionManager(
         await redisCache.AddSessionToCacheAsync(session);
 
         LoggingEvents.LogNewSessionSuccess(logger, session.Id, session.PlayerScores.Keys.First());
+
+        return (sessionGuid, hostGuid);
     }
 
     public async Task<bool> DoesGameSessionExistAsync(Guid sessionId) => await redisCache.CheckIfSessionExistsAsync(sessionId);

@@ -14,7 +14,7 @@ public interface IManageGameSessions
 
     public Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round);
 
-    public Task CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName);
+    public Task<(Guid SessionGuid, Guid HostGuid)> CreateNewGameSessionAsync(int numberOfQuestions, string hostPlayerName);
 
     public Task<bool> DoesGameSessionExistAsync(Guid sessionId);
 }

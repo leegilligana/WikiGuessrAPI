@@ -16,15 +16,15 @@ public class GameSessionCacher(
     public async Task AddSessionToCacheAsync(Session session)
     {
         // If I ever go back and add batching to question / answer fetching it should be put here...
-        var question0 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 0);
-        var question1 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 1);
-        var answer0 = await answerFetcher.FetchAnswerByIdAsync(question0.AnswerId);
-        var answer1 = await answerFetcher.FetchAnswerByIdAsync(question1.AnswerId);
+        //var question0 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 0);
+        //var question1 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 1);
+        //var answer0 = await answerFetcher.FetchAnswerByIdAsync(question0.AnswerId);
+        //var answer1 = await answerFetcher.FetchAnswerByIdAsync(question1.AnswerId);
 
-        var question0Json = JsonSerializer.Serialize(question0);
-        var question1Json = JsonSerializer.Serialize(question1);
-        var answer0Json = JsonSerializer.Serialize(answer0);
-        var answer1Json = JsonSerializer.Serialize(answer1);
+        //var question0Json = JsonSerializer.Serialize(question0);
+        //var question1Json = JsonSerializer.Serialize(question1);
+        //var answer0Json = JsonSerializer.Serialize(answer0);
+        //var answer1Json = JsonSerializer.Serialize(answer1);
 
         var db = redis.GetDatabase();
         var batch = db.CreateBatch();
@@ -41,10 +41,10 @@ public class GameSessionCacher(
         _ = batch.SortedSetAddAsync(GetPlayerScoresKey(session.Id), firstPlayerId, 0);
         _ = batch.HashSetAsync(GetPlayerNamesKey(session.Id), firstPlayerId, session.PlayerNames.Values.First());
         _ = batch.HashSetAsync(GetLastAnsweredKey(session.Id), firstPlayerId, 0);
-        _ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [0, question0Json]);
-        _ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [1, question1Json]);
-        _ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer0Json]);
-        _ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer1Json]);
+        //_ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [0, question0Json]);
+        //_ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [1, question1Json]);
+        //_ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer0Json]);
+        //_ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer1Json]);
 
         _ = batch.KeyExpireAsync(GetSessionDataKey(session.Id), ttlTimespan);
         _ = batch.KeyExpireAsync(GetPlayerScoresKey(session.Id), ttlTimespan);
