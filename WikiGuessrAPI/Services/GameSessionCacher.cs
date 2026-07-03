@@ -54,14 +54,6 @@ public class GameSessionCacher(
         batch.Execute();
     }
 
-    public async Task<bool> CheckIfSessionExistsAsync(Guid sessionId)
-    {
-        var db = redis.GetDatabase();
-        var sessionDataKey = $"session:{sessionId}";
-
-        return await db.KeyExistsAsync(sessionDataKey);
-    }
-
     public async Task DeleteSessionAsync(Guid sessionId)
     {
         var db = redis.GetDatabase();

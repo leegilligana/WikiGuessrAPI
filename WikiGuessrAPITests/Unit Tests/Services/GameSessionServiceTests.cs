@@ -109,12 +109,12 @@ public class GameSessionServiceTests
 
         if (invalidQuestionCount || redisError)
         {
-            var act = async () => await gameSessionService.CreateNewGameSessionAsync(numQuestions, "Rosetta");
+            var act = async () => await gameSessionService.CreateNewSessionAsync(numQuestions, "Rosetta");
             await act.Should().ThrowAsync<ArgumentException>();
         }
         else
         {
-            await gameSessionService.CreateNewGameSessionAsync(numQuestions, "Eevee");
+            await gameSessionService.CreateNewSessionAsync(numQuestions, "Eevee");
             redisCacheMock.Verify(x => x.AddSessionToCacheAsync(It.Is<Session>(s => s.RoundLimit == numQuestions)), Times.Once);
         }
 

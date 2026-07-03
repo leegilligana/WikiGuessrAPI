@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Controllers;
@@ -8,24 +7,25 @@ namespace WikiGuessrAPI.Controllers;
 [ApiController]
 public class GameSessionController(IManageGameSessions gameSessionManager) : ControllerBase
 {
-    [HttpPost(Name = "CreateGame")]
-    public async Task<ActionResult<string>> CreateGame(int numRounds, string hostPlayerName)
+    [HttpPost(Name = "CreateSession")]
+    public async Task<ActionResult> CreateSessionAsync([FromQuery] int numRounds, [FromQuery] string hostPlayerName)
     {
-        var (sessionGuid, hostGuid) = await gameSessionManager.CreateNewGameSessionAsync(numRounds, hostPlayerName);
+        var (sessionGuid, hostGuid) = await gameSessionManager.CreateNewSessionAsync(numRounds, hostPlayerName);
+        var result = new { SessionId = sessionGuid, PlayerId = hostGuid };
 
-        return Ok($"Game session created successfully. Session id: {sessionGuid}, player id: {hostGuid}");
+        return CreatedAtRoute("FetchSession", new { sessionId = sessionGuid }, result);
     }
 
-    [HttpGet("{sessionId}/exists", Name = "CheckGameExists")]
-    public async Task<ActionResult<bool>> CheckGameExists(Guid sessionId)
+    [HttpGet("{sessionId}", Name = "FetchSession")]
+    public async Task<ActionResult<bool>> FetchSessionAsync(Guid sessionId)
     {
-        var exists = await gameSessionManager.DoesGameSessionExistAsync(sessionId);
+        var exists = await gameSessionManager.FetchSessionAsync(sessionId);
 
         return Ok(exists);
     }
 
-    [HttpDelete("{sessionId}", Name = "DeleteGame")]
-    public async Task<ActionResult> DeleteGame(Guid sessionId)
+    [HttpDelete("{sessionId}", Name = "DeleteSession")]
+    public async Task<ActionResult> DeleteSessionAsync(Guid sessionId)
     {
         await gameSessionManager.DeleteSessionIfExistsAsync(sessionId);
         return Ok($"Game session {sessionId} deleted successfully.");

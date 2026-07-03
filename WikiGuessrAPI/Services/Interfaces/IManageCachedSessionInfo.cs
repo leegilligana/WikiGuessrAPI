@@ -6,8 +6,6 @@ public interface IManageCachedSessionInfo
 {
     public Task AddSessionToCacheAsync(Session session);
 
-    public Task<bool> CheckIfSessionExistsAsync(Guid sessionId);
-
     public Task DeleteSessionAsync(Guid sessionId);
 
     public Task<Session?> FetchSessionAsync(Guid sessionId);

@@ -1,5 +1,6 @@
 using Scalar.AspNetCore;
 using StackExchange.Redis;
+using WikiGuessrAPI.Infrastructure;
 using WikiGuessrAPI.Services;
 using WikiGuessrAPI.Services.Interfaces;
 
@@ -17,6 +18,22 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = redisConnectionString;
 });
 builder.Services.AddOpenApi();
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        var exception = context.HttpContext.Features
+            .Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?
+            .Error;
+
+        if (exception != null)
+        {
+            context.ProblemDetails.Detail = exception.Message;
+            context.ProblemDetails.Extensions["exceptionType"] = exception.GetType().Name;
+        }
+    };
+});
 
 // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<IWrapDapper>(new DapperWrapper(string.Empty));
@@ -35,7 +52,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseExceptionHandler();
 app.UseAuthorization();
 
 app.MapControllers();
