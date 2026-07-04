@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
 using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Models.DTO;
 using WikiGuessrAPI.Services.Interfaces;
@@ -55,6 +55,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
             Round = 0,
             RoundLimit = 10,
         };
+
         await sessionCache.AddSessionToCacheAsync(sessionToFetch);
 
         var client = factory.CreateClient();
@@ -108,6 +109,94 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
 
         var fetchResponse = await client.GetAsync($"/api/GameSession/{sessionGuid}", TestContext.Current.CancellationToken);
         fetchResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task RemovePlayerAsHostTest_SessionFound(bool isHost, bool shouldFindPlayer)
+    {
+        var sessionGuid = Guid.NewGuid();
+        var playerGuid = Guid.NewGuid();
+        using var scope = factory.Services.CreateScope();
+        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionToModify = new Session()
+        {
+            PlayerNames = new()
+            {
+                { playerGuid, "Player1" },
+            },
+            PlayerScores = new()
+            {
+                { playerGuid, 10 },
+            },
+            Id = sessionGuid,
+            Seed = Guid.NewGuid(),
+            HostId = playerGuid,
+            Round = 0,
+            RoundLimit = 10,
+        };
+
+        await sessionCache.AddSessionToCacheAsync(sessionToModify);
+
+        var client = factory.CreateClient();
+        var queryGuid = isHost ? playerGuid : Guid.NewGuid();
+        var playerToKick = shouldFindPlayer ? "Player1" : "NonExistentPlayer";
+        var response = await client.DeleteAsync($"/api/GameSession/{sessionGuid}/hosts/{queryGuid}/playerNames/{playerToKick}", TestContext.Current.CancellationToken);
+
+        var expectedStatusCode = isHost ? (shouldFindPlayer ? HttpStatusCode.OK : HttpStatusCode.NotFound) : HttpStatusCode.Forbidden;
+        response.StatusCode.Should().Be(expectedStatusCode);
+    }
+
+    [Fact]
+    public async Task RemovePlayerFromSessionAsHost_SessionNotFound()
+    {
+        var sessionGuid = Guid.NewGuid();
+        var playerGuid = Guid.NewGuid();
+        var client = factory.CreateClient();
+        var response = await client.DeleteAsync($"/api/GameSession/{sessionGuid}/hosts/{playerGuid}/playerNames/Player1", TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task DeleteSessionIfHost(bool isHost, bool sessionFound)
+    {
+        var sessionGuid = Guid.NewGuid();
+        var playerGuid = Guid.NewGuid();
+        using var scope = factory.Services.CreateScope();
+        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionToModify = new Session()
+        {
+            PlayerNames = new()
+            {
+                { playerGuid, "Player1" },
+            },
+            PlayerScores = new()
+            {
+                { playerGuid, 10 },
+            },
+            Id = sessionGuid,
+            Seed = Guid.NewGuid(),
+            HostId = playerGuid,
+            Round = 0,
+            RoundLimit = 10,
+        };
+
+        await sessionCache.AddSessionToCacheAsync(sessionToModify);
+
+        var client = factory.CreateClient();
+        var queryPlayerGuid = isHost ? playerGuid : Guid.NewGuid();
+        var querySessionGuid = sessionFound ? sessionGuid : Guid.NewGuid();
+        var response = await client.DeleteAsync($"/api/GameSession/{querySessionGuid}/hosts/{queryPlayerGuid}", TestContext.Current.CancellationToken);
+
+        var expectedStatusCode = sessionFound ? (isHost ? HttpStatusCode.OK : HttpStatusCode.Forbidden) : HttpStatusCode.NotFound;
+        response.StatusCode.Should().Be(expectedStatusCode);
     }
 }
 

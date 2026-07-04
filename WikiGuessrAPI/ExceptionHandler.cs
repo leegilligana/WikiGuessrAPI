@@ -9,27 +9,48 @@ namespace WikiGuessrAPI.Infrastructure;
 
 public class ExceptionHandler : IExceptionHandler
 {
+    private static readonly List<Type> NotFoundExceptions =
+    [
+        typeof(SessionNotFoundException),
+        typeof(PlayerNotInSessionException),
+    ];
+
+    private static readonly List<Type> ForbiddenExceptions =
+    [
+        typeof(PlayerNotHostException),
+    ];
+
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is SessionNotFoundException)
+        var (statusCode, title) = exception switch
         {
-            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            _ when NotFoundExceptions.Contains(exception.GetType())
+                => (StatusCodes.Status404NotFound, "Resource Not Found"),
 
-            var problemDetails = new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title = "Resource Not Found",
-                Detail = exception.Message
-            };
+            _ when ForbiddenExceptions.Contains(exception.GetType())
+                => (StatusCodes.Status403Forbidden, "Forbidden"),
 
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            _ => (0, null),
+        };
 
-            return true;
+        if (statusCode == 0)
+        {
+            return false;
         }
 
-        return false;
+        httpContext.Response.StatusCode = statusCode;
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = title,
+            Detail = exception.Message,
+        };
+
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        return true;
     }
 }
