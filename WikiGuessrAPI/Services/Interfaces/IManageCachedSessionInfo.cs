@@ -13,4 +13,6 @@ public interface IManageCachedSessionInfo
     public Task<bool> IncrementPlayerScoreAndCheckIfAllPlayersAnswered(Guid sessionId, Guid playerId, int points, int round);
 
     public Task RemovePlayerFromSession(Guid sessionId, Guid playerId);
+
+    public Task AddPlayerToSession(Guid sessionId, Guid playerId, string playerName);
 }

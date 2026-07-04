@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text.Json;
 using StackExchange.Redis;
 using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Services.Interfaces;
@@ -8,43 +7,48 @@ namespace WikiGuessrAPI.Services;
 
 public class GameSessionCacher(
     IConnectionMultiplexer redis,
-    ICreateAndFetchQuestionListQuestions questionListQuestionsService,
-    IFetchAnswers answerFetcher) : IManageCachedSessionInfo
+    ICreateAndFetchQuestionListQuestions questionListQuestionsService) : IManageCachedSessionInfo
 {
     private readonly int ttl = 10;
 
     public async Task AddSessionToCacheAsync(Session session)
     {
-        // If I ever go back and add batching to question / answer fetching it should be put here...
-        //var question0 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 0);
-        //var question1 = await questionListQuestionsService.FetchQuestionFromListSeedAsync(session.Seed, 1);
-        //var answer0 = await answerFetcher.FetchAnswerByIdAsync(question0.AnswerId);
-        //var answer1 = await answerFetcher.FetchAnswerByIdAsync(question1.AnswerId);
-
-        //var question0Json = JsonSerializer.Serialize(question0);
-        //var question1Json = JsonSerializer.Serialize(question1);
-        //var answer0Json = JsonSerializer.Serialize(answer0);
-        //var answer1Json = JsonSerializer.Serialize(answer1);
-
         var db = redis.GetDatabase();
         var batch = db.CreateBatch();
-
-        var firstPlayerId = session.PlayerScores.Keys.First().ToString();
         var ttlTimespan = TimeSpan.FromMinutes(ttl);
 
         _ = batch.HashSetAsync(GetSessionDataKey(session.Id), [
             new("Seed", session.Seed.ToString()),
             new("Round", session.Round),
-            new("RoundLimit", session.RoundLimit)
-        ]);
+            new("RoundLimit", session.RoundLimit),
+            new("HostId", session.HostId.ToString())]);
 
-        _ = batch.SortedSetAddAsync(GetPlayerScoresKey(session.Id), firstPlayerId, 0);
-        _ = batch.HashSetAsync(GetPlayerNamesKey(session.Id), firstPlayerId, session.PlayerNames.Values.First());
-        _ = batch.HashSetAsync(GetLastAnsweredKey(session.Id), firstPlayerId, 0);
-        //_ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [0, question0Json]);
-        //_ = batch.ListRightPushAsync(GetUpcomingQuestionsKey(session.Id), [1, question1Json]);
-        //_ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer0Json]);
-        //_ = batch.ListRightPushAsync(GetUpcomingAnswersKey(session.Id), [1, answer1Json]);
+        var scoreEntries = session.PlayerScores
+            .Select(kvp => new SortedSetEntry(kvp.Key.ToString(), kvp.Value))
+            .ToArray();
+
+        if (scoreEntries.Length > 0)
+        {
+            _ = batch.SortedSetAddAsync(GetPlayerScoresKey(session.Id), scoreEntries);
+        }
+
+        var nameEntries = session.PlayerNames
+            .Select(kvp => new HashEntry(kvp.Key.ToString(), kvp.Value))
+            .ToArray();
+
+        if (nameEntries.Length > 0)
+        {
+            _ = batch.HashSetAsync(GetPlayerNamesKey(session.Id), nameEntries);
+        }
+
+        var lastAnsweredEntries = session.PlayerScores.Keys
+            .Select(playerId => new HashEntry(playerId.ToString(), 0))
+            .ToArray();
+
+        if (lastAnsweredEntries.Length > 0)
+        {
+            _ = batch.HashSetAsync(GetLastAnsweredKey(session.Id), lastAnsweredEntries);
+        }
 
         _ = batch.KeyExpireAsync(GetSessionDataKey(session.Id), ttlTimespan);
         _ = batch.KeyExpireAsync(GetPlayerScoresKey(session.Id), ttlTimespan);
@@ -86,6 +90,7 @@ public class GameSessionCacher(
         }
 
         var sessionDict = sessionData.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
+
         Dictionary<Guid, string> playerNames = [];
         Dictionary<Guid, int> playerScores = [];
 
@@ -109,6 +114,7 @@ public class GameSessionCacher(
             Seed = Guid.Parse(sessionDict["Seed"]),
             Round = int.Parse(sessionDict["Round"], CultureInfo.InvariantCulture),
             RoundLimit = int.Parse(sessionDict["RoundLimit"], CultureInfo.InvariantCulture),
+            HostId = Guid.Parse(sessionDict["HostId"]),
             PlayerNames = playerNames,
             PlayerScores = playerScores,
         };
@@ -171,6 +177,29 @@ public class GameSessionCacher(
         _ = batch.HashDeleteAsync(playerNamesKey, playerIdStr);
         _ = batch.HashDeleteAsync(lastAnsweredKey, playerIdStr);
 
+        _ = batch.KeyExpireAsync(playerScoresKey, ttlTimespan);
+        _ = batch.KeyExpireAsync(playerNamesKey, ttlTimespan);
+        _ = batch.KeyExpireAsync(lastAnsweredKey, ttlTimespan);
+
+        batch.Execute();
+        await Task.CompletedTask;
+    }
+
+    public async Task AddPlayerToSession(Guid sessionId, Guid playerId, string playerName)
+    {
+        var db = redis.GetDatabase();
+        var batch = db.CreateBatch();
+
+        var playerIdStr = playerId.ToString();
+        var ttlTimespan = TimeSpan.FromMinutes(ttl);
+
+        var playerScoresKey = GetPlayerScoresKey(sessionId);
+        var playerNamesKey = GetPlayerNamesKey(sessionId);
+        var lastAnsweredKey = GetLastAnsweredKey(sessionId);
+
+        _ = batch.SortedSetAddAsync(playerScoresKey, playerIdStr, 0);
+        _ = batch.HashSetAsync(playerNamesKey, playerIdStr, playerName);
+        _ = batch.HashSetAsync(lastAnsweredKey, playerIdStr, 0);
         _ = batch.KeyExpireAsync(playerScoresKey, ttlTimespan);
         _ = batch.KeyExpireAsync(playerNamesKey, ttlTimespan);
         _ = batch.KeyExpireAsync(lastAnsweredKey, ttlTimespan);

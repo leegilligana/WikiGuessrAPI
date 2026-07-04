@@ -6,6 +6,8 @@ public class Session
 
     public Guid Seed { get; init; }
 
+    public Guid HostId { get; init; }
+
     public required Dictionary<Guid, int> PlayerScores { get; init; }
 
     public required Dictionary<Guid, string> PlayerNames { get; init; }

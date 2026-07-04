@@ -1,9 +1,10 @@
-﻿using System.Net;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Models.DTO;
 using WikiGuessrAPI.Services.Interfaces;
 using Xunit;
 
@@ -37,18 +38,20 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
         var sessionGuid = Guid.NewGuid();
         using var scope = factory.Services.CreateScope();
         var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var playerGuid = Guid.NewGuid();
         var sessionToFetch = new Session()
         {
             PlayerNames = new()
             {
-                { Guid.NewGuid(), "Player1" },
+                { playerGuid, "Player1" },
             },
             PlayerScores = new()
             {
-                { Guid.NewGuid(), 0 },
+                { playerGuid, 10 },
             },
             Id = shouldFindSession ? sessionGuid : Guid.NewGuid(),
             Seed = Guid.NewGuid(),
+            HostId = playerGuid,
             Round = 0,
             RoundLimit = 10,
         };
@@ -57,6 +60,22 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
         var client = factory.CreateClient();
         var response = await client.GetAsync($"/api/GameSession/{sessionGuid}", TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(shouldFindSession ? HttpStatusCode.OK : HttpStatusCode.NotFound);
+
+        if (shouldFindSession)
+        {
+            var dto = await response.Content.ReadFromJsonAsync<SessionDTO>(cancellationToken: TestContext.Current.CancellationToken);
+
+            dto.Should().NotBeNull();
+
+            dto.Id.Should().Be(sessionToFetch.Id);
+            dto.Round.Should().Be(sessionToFetch.Round);
+            dto.RoundLimit.Should().Be(sessionToFetch.RoundLimit);
+
+            dto.PlayerScores.Should().NotBeNull();
+            dto.PlayerScores.Should().HaveCount(1);
+            dto.PlayerScores.Should().ContainKey("Player1");
+            dto.PlayerScores["Player1"].Should().Be(10);
+        }
     }
 
     [Fact]
@@ -77,6 +96,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
             },
             Id = sessionGuid,
             Seed = Guid.NewGuid(),
+            HostId = Guid.NewGuid(),
             Round = 0,
             RoundLimit = 10,
         };

@@ -4,7 +4,7 @@ namespace WikiGuessrAPI.Services.Interfaces;
 
 public interface IManageGameSessions
 {
-    public Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId);
+    public Task<Guid> AddPlayerToSessionAsync(Guid sessionId, string playerName);
 
     public Task DeleteSessionIfExistsAsync(Guid sessionId);
 
@@ -19,4 +19,8 @@ public interface IManageGameSessions
     public Task<(Guid SessionGuid, Guid HostGuid)> CreateNewSessionAsync(int numberOfQuestions, string hostPlayerName);
 
     public Task<Session> FetchSessionAsync(Guid sessionId);
+
+    public Task DeleteSessionIfHostAsync(Guid sessionId, Guid hostId);
+
+    public Task RemovePlayerIfHostAsync(Guid sessionId, Guid hostId, string playerName);
 }

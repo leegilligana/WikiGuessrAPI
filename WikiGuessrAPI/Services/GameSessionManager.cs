@@ -8,23 +8,27 @@ public class GameSessionManager(
     ILogger<GameSessionManager> logger,
     IManageCachedSessionInfo redisCache) : IManageGameSessions
 {
-    public async Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId)
+    public async Task<Guid> AddPlayerToSessionAsync(Guid sessionId, string playerName)
     {
-        LoggingEvents.LogAddingPlayer(logger, playerId, sessionId);
+        var playerId = Guid.NewGuid();
+
+        LoggingEvents.LogAddingPlayer(logger, playerId, sessionId, playerName);
 
         var sessionPlayers = (await redisCache.FetchSessionAsync(sessionId))?.PlayerScores?.Keys
             ?? throw new SessionNotFoundException(sessionId);
 
         if (sessionPlayers.Contains(playerId))
         {
-            throw new InvalidOperationException("Player is already in session");
+            throw new PlayerAlreadyInSessionException(sessionId, playerId);
         }
         else if (sessionPlayers.Count >= 4)
         {
             throw new SessionIsFullException(sessionId, playerId);
         }
 
-        await AddPlayerToSessionAsync(sessionId, playerId);
+        await redisCache.AddPlayerToSession(sessionId, playerId, playerName);
+
+        return playerId;
     }
 
     public async Task<(Guid SessionGuid, Guid HostGuid)> CreateNewSessionAsync(int numberOfQuestions, string hostPlayerName)
@@ -42,6 +46,7 @@ public class GameSessionManager(
         {
             Id = sessionGuid,
             Seed = Guid.NewGuid(),
+            HostId = hostGuid,
             PlayerScores = new()
             {
                 { hostGuid, 0 },
@@ -56,7 +61,7 @@ public class GameSessionManager(
 
         await redisCache.AddSessionToCacheAsync(session);
 
-        LoggingEvents.LogNewSessionSuccess(logger, session.Id, session.PlayerScores.Keys.First());
+        LoggingEvents.LogNewSessionSuccess(logger, session.Id, hostGuid, hostPlayerName);
 
         return (sessionGuid, hostGuid);
     }
@@ -80,6 +85,39 @@ public class GameSessionManager(
         LoggingEvents.LogKickPlayer(logger, playerId, sessionId);
 
         await redisCache.RemovePlayerFromSession(sessionId, playerId);
+    }
+
+    public async Task DeleteSessionIfHostAsync(Guid sessionId, Guid hostId)
+    {
+        LoggingEvents.LogDeleteSessionAttempt(logger, sessionId, hostId);
+        var session = await redisCache.FetchSessionAsync(sessionId)
+            ?? throw new SessionNotFoundException(sessionId);
+        if (session.HostId != hostId)
+        {
+            throw new PlayerNotHostException(sessionId, hostId);
+        }
+
+        await redisCache.DeleteSessionAsync(sessionId);
+        LoggingEvents.LogDeleteSessionSuccess(logger, sessionId);
+    }
+
+    public async Task RemovePlayerIfHostAsync(Guid sessionId, Guid hostId, string playerName)
+    {
+        LoggingEvents.LogRemovePlayerAttempt(logger, sessionId, hostId, hostId);
+        var session = await redisCache.FetchSessionAsync(sessionId)
+            ?? throw new SessionNotFoundException(sessionId);
+        if (session.HostId != hostId)
+        {
+            throw new PlayerNotHostException(sessionId, hostId);
+        }
+
+        var playerToRemove = session.PlayerNames.FirstOrDefault(x => x.Value == playerName).Key;
+        if (playerToRemove == Guid.Empty)
+        {
+            throw new PlayerNotInSessionException(sessionId, playerName);
+        }
+
+        await redisCache.RemovePlayerFromSession(sessionId, playerToRemove);
     }
 
     public async Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round) => await redisCache.IncrementPlayerScoreAndCheckIfAllPlayersAnswered(sessionId, playerId, scoreIncrease, round);
