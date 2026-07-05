@@ -14,7 +14,7 @@ public class QuestionIdListFetcherTests
         var a = QuestionIdListFetcher.GuidToQuestionIdList(seed, 100, 10);
         var b = QuestionIdListFetcher.GuidToQuestionIdList(seed, 100, 10);
 
-        a.Should().BeEquivalentTo(b) // Note: BeEquivalentTo is usually preferred for matching collection contents
+        a.Should().BeEquivalentTo(b)
             .And.NotBeInAscendingOrder()
             .And.HaveCount(10)
             .And.AllSatisfy(questionId =>
