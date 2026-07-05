@@ -2,7 +2,7 @@
 using WikiGuessrAPI.Models.DTO;
 using Xunit;
 
-namespace WikiGuessrAPI.Tests;
+namespace WikiGuessrAPITests.Unit_Tests.Models;
 
 public class SessionDTOTests
 {

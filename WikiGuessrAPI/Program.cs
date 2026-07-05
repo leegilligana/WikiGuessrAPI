@@ -39,7 +39,6 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddSingleton<IWrapDapper>(new DapperWrapper(string.Empty));
 builder.Services.AddScoped<IManageCachedSessionInfo, GameSessionCacher>();
 builder.Services.AddScoped<IManageGameSessions, GameSessionManager>();
-builder.Services.AddScoped<ICreateAndFetchQuestionIdLists, QuestionIdListFetcher>();
 builder.Services.AddScoped<IFetchAnswers, AnswerFetcher>();
 
 var app = builder.Build();

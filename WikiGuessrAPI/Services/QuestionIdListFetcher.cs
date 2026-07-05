@@ -11,8 +11,7 @@ public static class QuestionIdListFetcher
 
         var seed = GuidToInt(seedGuid);
         var random = new Random(seed);
-        return Enumerable.Range(0, maxQuestions)
-                     .Select(_ => random.Next(upperBound));
+        return [.. Enumerable.Range(0, maxQuestions).Select(_ => random.Next(upperBound))];
     }
 
     public static int GuidToInt(Guid seedGuid)
