@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
 using WikiGuessrAPI.Models.Exceptions;
 
-namespace WikiGuessrAPI.Infrastructure;
+namespace WikiGuessrAPI;
 
 public class ExceptionHandler : IExceptionHandler
 {

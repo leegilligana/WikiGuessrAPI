@@ -5,9 +5,7 @@ using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-public class GameSessionCacher(
-    IConnectionMultiplexer redis,
-    ICreateAndFetchQuestionListQuestions questionListQuestionsService) : IManageCachedSessionInfo
+public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSessionInfo
 {
     private readonly int ttl = 10;
 
