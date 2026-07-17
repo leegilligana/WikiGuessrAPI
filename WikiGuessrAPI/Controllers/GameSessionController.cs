@@ -6,7 +6,7 @@ namespace WikiGuessrAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class GameSessionController(IManageGameSessions gameSessionManager) : ControllerBase
+public class GameSessionController(IManageInactiveSessions gameSessionManager) : ControllerBase
 {
     [HttpPost(Name = "CreateSession")]
     public async Task<ActionResult> CreateSessionAsync([FromQuery] int numRounds, [FromQuery] string hostPlayerName)

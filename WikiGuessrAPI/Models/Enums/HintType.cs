@@ -1,6 +1,6 @@
 ﻿namespace WikiGuessrAPI.Models.Enums;
 
-public enum QuestionType
+public enum HintType
 {
     City,
     Battle,

@@ -1,12 +1,13 @@
 ﻿using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Models.DTO;
 using WikiGuessrAPI.Models.Exceptions;
 using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-public class GameSessionManager(
-    ILogger<GameSessionManager> logger,
-    IManageCachedSessionInfo redisCache) : IManageGameSessions
+public class InactiveSessionManager(
+    ILogger<InactiveSessionManager> logger,
+    IManageInactiveSessionCache redisCache) : IManageInactiveSessions
 {
     public async Task<Guid> AddPlayerToSessionAsync(Guid sessionId, string playerName)
     {
@@ -120,5 +121,7 @@ public class GameSessionManager(
         await redisCache.RemovePlayerFromSession(sessionId, playerToRemove);
     }
 
-    public async Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round) => await redisCache.IncrementPlayerScoreAndCheckIfAllPlayersAnswered(sessionId, playerId, scoreIncrease, round);
+    public Task<IEnumerable<SessionDTO>> GetInactiveSessionsAsync() => throw new NotImplementedException();
+
+    public Task SetTTL(int seconds, Guid sessionId) => throw new NotImplementedException();
 }

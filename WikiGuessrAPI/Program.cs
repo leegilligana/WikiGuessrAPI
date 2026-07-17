@@ -1,3 +1,5 @@
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
 using Scalar.AspNetCore;
 using StackExchange.Redis;
 using WikiGuessrAPI;
@@ -11,7 +13,24 @@ builder.Services.AddControllers();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 string redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? string.Empty;
-builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+
+var redisConnection = ConnectionMultiplexer.Connect(redisConnectionString);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnection);
+
+var multiplexers = new List<RedLockMultiplexer>
+{
+    new(redisConnection),
+};
+
+var redlockFactory = RedLockFactory.Create(multiplexers);
+builder.Services.AddSingleton(redlockFactory);
+builder.Services.AddHostedService<GameSessionOrchestrator>();
+
+builder.Services.AddSignalR()
+    .AddStackExchangeRedis(redisConnectionString, options =>
+    {
+        options.Configuration.ChannelPrefix = "WikiGuessr";
+    });
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -37,8 +56,8 @@ builder.Services.AddProblemDetails(options =>
 
 // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<IWrapDapper>(new DapperWrapper(string.Empty));
-builder.Services.AddScoped<IManageCachedSessionInfo, GameSessionCacher>();
-builder.Services.AddScoped<IManageGameSessions, GameSessionManager>();
+builder.Services.AddScoped<IManageInactiveSessionCache, InactiveSessionInfoCacher>();
+builder.Services.AddScoped<IManageInactiveSessions, InactiveSessionManager>();
 builder.Services.AddScoped<IFetchAnswers, AnswerFetcher>();
 
 var app = builder.Build();
@@ -53,6 +72,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseExceptionHandler();
 app.UseAuthorization();
+app.MapHub<GameSessionHub>("/gameSessionHub");
 
 app.MapControllers();
 

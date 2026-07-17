@@ -8,5 +8,5 @@ public class GameUpdate
 
     public string? NextQuestionName { get; init; }
 
-    public QuestionType? NextQuestionType { get; init; }
+    public HintType? NextQuestionType { get; init; }
 }

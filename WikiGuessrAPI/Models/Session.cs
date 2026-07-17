@@ -14,5 +14,9 @@ public class Session
 
     public int Round { get; init; }
 
+    public int Hint { get; init; }
+
+    public long UpdateDue { get; init; }
+
     public int RoundLimit { get; init; }
 }

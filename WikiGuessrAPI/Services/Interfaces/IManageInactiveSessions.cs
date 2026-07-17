@@ -1,8 +1,9 @@
 ﻿using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Models.DTO;
 
 namespace WikiGuessrAPI.Services.Interfaces;
 
-public interface IManageGameSessions
+public interface IManageInactiveSessions
 {
     public Task<Guid> AddPlayerToSessionAsync(Guid sessionId, string playerName);
 
@@ -10,11 +11,9 @@ public interface IManageGameSessions
 
     public Task RemovePlayerFromSessionAsync(Guid sessionId, Guid playerId);
 
-    public Task<Dictionary<Guid, int>> GetPlayerScoresAsync(Guid sessionId);
-
     public Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId);
 
-    public Task<bool> IncrementPlayerScoreAndCheckIfAllAnsweredAsync(Guid sessionId, Guid playerId, int scoreIncrease, int round);
+    public Task<IEnumerable<SessionDTO>> GetInactiveSessionsAsync();
 
     public Task<(Guid SessionGuid, Guid HostGuid)> CreateNewSessionAsync(int numberOfQuestions, string hostPlayerName);
 
@@ -23,4 +22,6 @@ public interface IManageGameSessions
     public Task DeleteSessionIfHostAsync(Guid sessionId, Guid hostId);
 
     public Task RemovePlayerIfHostAsync(Guid sessionId, Guid hostId, string playerName);
+
+    public Task SetTTL(int seconds, Guid sessionId);
 }

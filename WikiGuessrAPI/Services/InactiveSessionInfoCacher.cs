@@ -5,7 +5,7 @@ using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSessionInfo
+public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageInactiveSessionCache
 {
     private readonly int ttl = 10;
 
@@ -65,8 +65,6 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
         _ = batch.KeyDeleteAsync(GetPlayerScoresKey(sessionId));
         _ = batch.KeyDeleteAsync(GetPlayerNamesKey(sessionId));
         _ = batch.KeyDeleteAsync(GetLastAnsweredKey(sessionId));
-        _ = batch.KeyDeleteAsync(GetUpcomingQuestionsKey(sessionId));
-        _ = batch.KeyDeleteAsync(GetUpcomingAnswersKey(sessionId));
 
         batch.Execute();
     }
@@ -95,7 +93,7 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
         var playerScoresHash = await playerScoresTask;
         foreach (var scorePair in playerScoresHash)
         {
-            var playerId = Guid.Parse(scorePair.Element!.ToString());
+            var playerId = Guid.Parse(scorePair.Element.ToString());
             playerScores[playerId] = (int)scorePair.Score;
         }
 
@@ -103,7 +101,7 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
         foreach (var namePair in playerNamesHash)
         {
             var playerId = Guid.Parse(namePair.Name.ToString());
-            playerNames[playerId] = namePair.Value!.ToString();
+            playerNames[playerId] = namePair.Value.ToString();
         }
 
         return new Session
@@ -118,7 +116,7 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
         };
     }
 
-    public async Task<bool> IncrementPlayerScoreAndCheckIfAllPlayersAnswered(Guid sessionId, Guid playerId, int points, int round)
+    public async Task IncrementPlayerScoreAsync(Guid sessionId, Guid playerId, int points, int round)
     {
         var db = redis.GetDatabase();
 
@@ -152,11 +150,7 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
         _ = tran.KeyExpireAsync(playerScoresKey, ttlTimespan);
         _ = tran.KeyExpireAsync(lastAnsweredKey, ttlTimespan);
 
-        bool success = await tran.ExecuteAsync();
-
-        return !success
-            ? await IncrementPlayerScoreAndCheckIfAllPlayersAnswered(sessionId, playerId, points, round)
-            : allPlayersHaveAnswered;
+        await tran.ExecuteAsync();
     }
 
     public async Task RemovePlayerFromSession(Guid sessionId, Guid playerId)
@@ -213,10 +207,6 @@ public class GameSessionCacher(IConnectionMultiplexer redis) : IManageCachedSess
     private static string GetPlayerNamesKey(Guid sessionId) => $"session:{sessionId}:names";
 
     private static string GetLastAnsweredKey(Guid sessionId) => $"session:{sessionId}:lastAnswered";
-
-    private static string GetUpcomingQuestionsKey(Guid sessionId) => $"session:{sessionId}:upcomingAnswers";
-
-    private static string GetUpcomingAnswersKey(Guid sessionId) => $"session:{sessionId}:upcomingQuestions";
 
     private async Task ResetSessionTTL(Guid sessionId)
     {

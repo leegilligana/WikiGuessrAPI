@@ -37,7 +37,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
     {
         var sessionGuid = Guid.NewGuid();
         using var scope = factory.Services.CreateScope();
-        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
         var playerGuid = Guid.NewGuid();
         var sessionToFetch = new Session()
         {
@@ -84,7 +84,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
     {
         var sessionGuid = Guid.NewGuid();
         using var scope = factory.Services.CreateScope();
-        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
         var sessionToDelete = new Session()
         {
             PlayerNames = new()
@@ -121,7 +121,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
         var sessionGuid = Guid.NewGuid();
         var playerGuid = Guid.NewGuid();
         using var scope = factory.Services.CreateScope();
-        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
         var sessionToModify = new Session()
         {
             PlayerNames = new()
@@ -170,7 +170,7 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
         var sessionGuid = Guid.NewGuid();
         var playerGuid = Guid.NewGuid();
         using var scope = factory.Services.CreateScope();
-        var sessionCache = scope.ServiceProvider.GetService<IManageCachedSessionInfo>();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
         var sessionToModify = new Session()
         {
             PlayerNames = new()

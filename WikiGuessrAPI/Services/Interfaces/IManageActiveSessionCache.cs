@@ -1,5 +1,5 @@
 ﻿namespace WikiGuessrAPI.Services.Interfaces;
 
-public interface IOrchestrateGameUpdatesAtIntervals
+public interface IManageActiveSessionCache
 {
 }

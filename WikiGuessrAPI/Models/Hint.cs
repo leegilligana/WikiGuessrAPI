@@ -1,6 +1,6 @@
 ﻿namespace WikiGuessrAPI.Models;
 
-public class Question
+public class Hint
 {
     public required string Name { get; init; }
 
@@ -10,7 +10,7 @@ public class Question
 
     public int ArticleId { get; init; }
 
-    public Enums.QuestionType Type { get; init; }
+    public Enums.HintType Type { get; init; }
 
     public int? Difficulty { get; init; }
 }
