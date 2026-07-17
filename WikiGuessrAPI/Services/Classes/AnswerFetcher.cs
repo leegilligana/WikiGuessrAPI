@@ -1,7 +1,7 @@
 ﻿using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Services.Interfaces;
 
-namespace WikiGuessrAPI.Services;
+namespace WikiGuessrAPI.Services.Classes;
 
 public class AnswerFetcher(IWrapDapper dapperWrapper) : IFetchAnswers
 {

@@ -1,4 +1,4 @@
-﻿namespace WikiGuessrAPI.Services;
+﻿namespace WikiGuessrAPI.Services.Classes;
 
 public static class QuestionIdListFetcher
 {

@@ -2,7 +2,7 @@
 using WikiGuessrAPI.Models.Exceptions;
 using WikiGuessrAPI.Services.Interfaces;
 
-namespace WikiGuessrAPI.Services;
+namespace WikiGuessrAPI.Services.Classes;
 
 public class InactiveSessionManager(
     ILogger<InactiveSessionManager> logger,

@@ -2,7 +2,7 @@
 using Moq;
 using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Models.Exceptions;
-using WikiGuessrAPI.Services;
+using WikiGuessrAPI.Services.Classes;
 using WikiGuessrAPI.Services.Interfaces;
 using Xunit;
 

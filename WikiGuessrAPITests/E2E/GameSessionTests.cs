@@ -5,7 +5,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Models.DTO;
-using WikiGuessrAPI.Services;
+using WikiGuessrAPI.Services.Classes;
 using WikiGuessrAPI.Services.Interfaces;
 using Xunit;
 

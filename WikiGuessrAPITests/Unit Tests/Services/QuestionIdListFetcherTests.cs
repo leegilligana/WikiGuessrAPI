@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using WikiGuessrAPI.Services;
+using WikiGuessrAPI.Services.Classes;
 using Xunit;
 
 namespace WikiGuessrAPITests.Unit_Tests.Services;

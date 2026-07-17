@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using WikiGuessrAPI.Models;
+using WikiGuessrAPI.Services.Classes;
 using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;

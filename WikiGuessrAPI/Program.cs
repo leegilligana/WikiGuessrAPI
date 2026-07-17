@@ -4,6 +4,7 @@ using Scalar.AspNetCore;
 using StackExchange.Redis;
 using WikiGuessrAPI;
 using WikiGuessrAPI.Services;
+using WikiGuessrAPI.Services.Classes;
 using WikiGuessrAPI.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);

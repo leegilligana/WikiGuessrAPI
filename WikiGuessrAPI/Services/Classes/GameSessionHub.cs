@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace WikiGuessrAPI.Services;
+namespace WikiGuessrAPI.Services.Classes;
 
 public class GameSessionHub : Hub
 {

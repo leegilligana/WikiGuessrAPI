@@ -1,7 +1,7 @@
 ﻿using RedLockNet.SERedis;
 using WikiGuessrAPI.Services.Interfaces;
 
-namespace WikiGuessrAPI.Services;
+namespace WikiGuessrAPI.Services.Classes;
 
 public class GameSessionOrchestrator(
     IServiceScopeFactory scopeFactory,
