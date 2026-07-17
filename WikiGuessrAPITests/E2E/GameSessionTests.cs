@@ -5,14 +5,29 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using WikiGuessrAPI.Models;
 using WikiGuessrAPI.Models.DTO;
+using WikiGuessrAPI.Services;
 using WikiGuessrAPI.Services.Interfaces;
 using Xunit;
 
 namespace WikiGuessrAPITests.E2E;
 
-public class GameSessionTests(WebApplicationFactory<Program> factory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class GameSessionTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> factory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
+            {
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(IHostedService) &&
+                         d.ImplementationType == typeof(GameSessionOrchestrator));
+
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+            });
+        });
+
     [Fact]
     public async Task CreateSessionTest()
     {
@@ -197,6 +212,78 @@ public class GameSessionTests(WebApplicationFactory<Program> factory)
 
         var expectedStatusCode = sessionFound ? (isHost ? HttpStatusCode.OK : HttpStatusCode.Forbidden) : HttpStatusCode.NotFound;
         response.StatusCode.Should().Be(expectedStatusCode);
+    }
+
+    [Fact]
+    public async Task GetAllInactiveSessions()
+    {
+        using var scope = factory.Services.CreateScope();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
+        var session1 = new Session()
+        {
+            PlayerNames = new()
+            {
+                { Guid.NewGuid(), "Player1" },
+            },
+            PlayerScores = new()
+            {
+                { Guid.NewGuid(), 10 },
+            },
+            Id = Guid.NewGuid(),
+            Seed = Guid.NewGuid(),
+            HostId = Guid.NewGuid(),
+            Round = 0,
+            RoundLimit = 10,
+            IsActive = true,
+        };
+
+        await sessionCache.AddSessionToCacheAsync(session1);
+
+        var sessions = await sessionCache.GetAllInactiveSessionsAsync();
+
+        sessions.Should().HaveCountGreaterThan(0)
+            .And.NotContain(s => s.IsActive);
+    }
+
+    [Theory]
+    [InlineData(15)]
+    [InlineData(0)]
+    public async Task SetSessionTTL(int ttl)
+    {
+        using var scope = factory.Services.CreateScope();
+        var sessionCache = scope.ServiceProvider.GetService<IManageInactiveSessionCache>();
+        var id = Guid.NewGuid();
+        var session1 = new Session()
+        {
+            PlayerNames = new()
+            {
+                { Guid.NewGuid(), "Player1" },
+            },
+            PlayerScores = new()
+            {
+                { Guid.NewGuid(), 10 },
+            },
+            Id = id,
+            Seed = Guid.NewGuid(),
+            HostId = Guid.NewGuid(),
+            Round = 0,
+            RoundLimit = 10,
+            IsActive = true,
+        };
+
+        await sessionCache.AddSessionToCacheAsync(session1);
+        await sessionCache.SetSessionTTLInSecondsAsync(id, ttl);
+
+        var retrieval = await sessionCache.FetchSessionAsync(id);
+
+        if (ttl <= 0)
+        {
+            retrieval.Should().BeNull();
+        }
+        else
+        {
+            retrieval.Should().NotBeNull();
+        }
     }
 }
 

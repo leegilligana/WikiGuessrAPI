@@ -13,7 +13,7 @@ public interface IManageInactiveSessions
 
     public Task<Dictionary<Guid, string>> GetPlayerNamesAsync(Guid sessionId);
 
-    public Task<IEnumerable<SessionDTO>> GetInactiveSessionsAsync();
+    public Task<IEnumerable<Session>> GetAllInactiveSessionsAsync();
 
     public Task<(Guid SessionGuid, Guid HostGuid)> CreateNewSessionAsync(int numberOfQuestions, string hostPlayerName);
 
@@ -23,5 +23,5 @@ public interface IManageInactiveSessions
 
     public Task RemovePlayerIfHostAsync(Guid sessionId, Guid hostId, string playerName);
 
-    public Task SetTTL(int seconds, Guid sessionId);
+    public Task SetSessionTTLAsync(Guid sessionId, int seconds);
 }

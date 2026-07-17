@@ -8,7 +8,7 @@ public class GameTickProcessor(
     IHubContext<GameSessionHub> hubContext,
     IManageActiveSessions activeSessionManager,
     IManageInactiveSessions inactiveSessionManager,
-    IManageRoundInfo roundInfoManager)
+    IManageRoundInfo roundInfoManager) : IDoGameTicks
 {
     public async Task ExecuteGameTickAsync(CancellationToken ct)
     {
@@ -59,6 +59,6 @@ public class GameTickProcessor(
         var lb = await activeSessionManager.GetPlayerLeaderboardAsync(session.Id);
         await hubContext.Clients.Group(session.Id.ToString()).SendAsync("SessionEnded", lb, cancellationToken: CancellationToken.None);
 
-        await inactiveSessionManager.SetTTL(30, session.Id);
+        await inactiveSessionManager.SetSessionTTLAsync(session.Id, 30);
     }
 }

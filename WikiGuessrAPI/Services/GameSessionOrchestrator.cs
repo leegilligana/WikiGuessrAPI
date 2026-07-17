@@ -4,7 +4,7 @@ using WikiGuessrAPI.Services.Interfaces;
 namespace WikiGuessrAPI.Services;
 
 public class GameSessionOrchestrator(
-    IDoGameTicks gameTickService,
+    IServiceScopeFactory scopeFactory,
     RedLockFactory lockFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,7 +19,11 @@ public class GameSessionOrchestrator(
             {
                 if (locked.IsAcquired)
                 {
-                    await gameTickService.ExecuteGameTickAsync(stoppingToken);
+                    using (var scope = scopeFactory.CreateScope())
+                    {
+                        var gameTickService = scope.ServiceProvider.GetRequiredService<IDoGameTicks>();
+                        await gameTickService.ExecuteGameTickAsync(stoppingToken);
+                    }
                 }
             }
 

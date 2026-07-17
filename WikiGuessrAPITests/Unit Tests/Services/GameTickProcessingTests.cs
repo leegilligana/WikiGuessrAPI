@@ -118,7 +118,7 @@ public class GameTickProcessingTests
             asm => asm.ProcessRoundEndAndGetLeaderboardAsync(It.IsAny<Guid>(), It.IsAny<long>()),
             shouldUpdate ? Times.Exactly(2) : Times.Never());
         mockInactiveSessionManager.Verify(
-            ism => ism.SetTTL(30, It.IsAny<Guid>()),
+            ism => ism.SetSessionTTLAsync(It.IsAny<Guid>(), 30),
             shouldUpdate ? Times.Once() : Times.Never());
     }
 }

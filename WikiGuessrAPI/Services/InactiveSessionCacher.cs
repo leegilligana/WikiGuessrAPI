@@ -5,7 +5,7 @@ using WikiGuessrAPI.Services.Interfaces;
 
 namespace WikiGuessrAPI.Services;
 
-public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageInactiveSessionCache
+public class InactiveSessionCacher(IConnectionMultiplexer redis) : IManageInactiveSessionCache
 {
     private readonly int ttl = 10;
 
@@ -52,6 +52,7 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
         _ = batch.KeyExpireAsync(GetPlayerScoresKey(session.Id), ttlTimespan);
         _ = batch.KeyExpireAsync(GetPlayerNamesKey(session.Id), ttlTimespan);
         _ = batch.KeyExpireAsync(GetLastAnsweredKey(session.Id), ttlTimespan);
+        _ = batch.SetAddAsync("sessions:index", session.Id.ToString());
 
         batch.Execute();
     }
@@ -65,6 +66,7 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
         _ = batch.KeyDeleteAsync(GetPlayerScoresKey(sessionId));
         _ = batch.KeyDeleteAsync(GetPlayerNamesKey(sessionId));
         _ = batch.KeyDeleteAsync(GetLastAnsweredKey(sessionId));
+        _ = batch.SetRemoveAsync("sessions:index", sessionId.ToString());
 
         batch.Execute();
     }
@@ -153,7 +155,7 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
         await tran.ExecuteAsync();
     }
 
-    public async Task RemovePlayerFromSession(Guid sessionId, Guid playerId)
+    public async Task RemovePlayerFromSessionAsync(Guid sessionId, Guid playerId)
     {
         var db = redis.GetDatabase();
         var batch = db.CreateBatch();
@@ -177,7 +179,7 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
         await Task.CompletedTask;
     }
 
-    public async Task AddPlayerToSession(Guid sessionId, Guid playerId, string playerName)
+    public async Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId, string playerName)
     {
         var db = redis.GetDatabase();
         var batch = db.CreateBatch();
@@ -200,6 +202,47 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
         await Task.CompletedTask;
     }
 
+    public async Task SetSessionTTLInSecondsAsync(Guid sessionId, int ttl)
+    {
+        var timespan = TimeSpan.FromSeconds(ttl);
+        var db = redis.GetDatabase();
+        var batch = db.CreateBatch();
+
+        batch.KeyExpireAsync($"session:{sessionId}", timespan);
+        batch.KeyExpireAsync($"session:{sessionId}:players", timespan);
+        batch.KeyExpireAsync($"session:{sessionId}:scores", timespan);
+        batch.KeyExpireAsync($"session:{sessionId}:lastAnswered", timespan);
+
+        batch.Execute();
+        await Task.CompletedTask;
+    }
+
+    public async Task<IEnumerable<Session>> GetAllInactiveSessionsAsync()
+    {
+        var db = redis.GetDatabase();
+        var sessionIds = await db.SetMembersAsync("sessions:index");
+        List<Session> validSessions = [];
+
+        foreach (var id in sessionIds)
+        {
+            var session = await FetchSessionAsync(Guid.Parse(id.ToString()));
+
+            if (session != null)
+            {
+                if (!session.IsActive)
+                {
+                    validSessions.Add(session);
+                }
+            }
+            else
+            {
+                await db.SetRemoveAsync("sessions:index", id);
+            }
+        }
+
+        return validSessions;
+    }
+
     private static string GetSessionDataKey(Guid sessionId) => $"session:{sessionId}";
 
     private static string GetPlayerScoresKey(Guid sessionId) => $"session:{sessionId}:scores";
@@ -207,16 +250,4 @@ public class InactiveSessionInfoCacher(IConnectionMultiplexer redis) : IManageIn
     private static string GetPlayerNamesKey(Guid sessionId) => $"session:{sessionId}:names";
 
     private static string GetLastAnsweredKey(Guid sessionId) => $"session:{sessionId}:lastAnswered";
-
-    private async Task ResetSessionTTL(Guid sessionId)
-    {
-        var timespan = TimeSpan.FromMinutes(ttl);
-        var db = redis.GetDatabase();
-        var batch = db.CreateBatch();
-
-        await batch.KeyExpireAsync($"session:{sessionId}", timespan);
-        await batch.KeyExpireAsync($"session:{sessionId}:players", timespan);
-        await batch.KeyExpireAsync($"session:{sessionId}:scores", timespan);
-        await batch.KeyExpireAsync($"session:{sessionId}:lastAnswered", timespan);
-    }
 }

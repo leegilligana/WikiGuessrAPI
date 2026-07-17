@@ -156,7 +156,7 @@ public class GameSessionServiceTests
         redisCacheMock.Setup(x => x.FetchSessionAsync(It.IsAny<Guid>())).ReturnsAsync(session);
 
         await gameSessionService.RemovePlayerFromSessionAsync(Guid.NewGuid(), toxicPlayer);
-        redisCacheMock.Verify(rcm => rcm.RemovePlayerFromSession(It.IsAny<Guid>(), It.Is<Guid>(g => g == toxicPlayer)));
+        redisCacheMock.Verify(rcm => rcm.RemovePlayerFromSessionAsync(It.IsAny<Guid>(), It.Is<Guid>(g => g == toxicPlayer)));
         loggerMock.VerifyLog(LogLevel.Information, "Kicking player");
     }
 }

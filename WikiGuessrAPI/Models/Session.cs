@@ -19,4 +19,6 @@ public class Session
     public long UpdateDue { get; init; }
 
     public int RoundLimit { get; init; }
+
+    public bool IsActive { get; init; }
 }

@@ -10,7 +10,11 @@ public interface IManageInactiveSessionCache
 
     public Task<Session?> FetchSessionAsync(Guid sessionId);
 
-    public Task RemovePlayerFromSession(Guid sessionId, Guid playerId);
+    public Task RemovePlayerFromSessionAsync(Guid sessionId, Guid playerId);
 
-    public Task AddPlayerToSession(Guid sessionId, Guid playerId, string playerName);
+    public Task AddPlayerToSessionAsync(Guid sessionId, Guid playerId, string playerName);
+
+    public Task<IEnumerable<Session>> GetAllInactiveSessionsAsync();
+
+    public Task SetSessionTTLInSecondsAsync(Guid sessionId, int ttl);
 }

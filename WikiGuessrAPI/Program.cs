@@ -56,9 +56,13 @@ builder.Services.AddProblemDetails(options =>
 
 // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<IWrapDapper>(new DapperWrapper(string.Empty));
-builder.Services.AddScoped<IManageInactiveSessionCache, InactiveSessionInfoCacher>();
+builder.Services.AddScoped<IManageInactiveSessionCache, InactiveSessionCacher>();
 builder.Services.AddScoped<IManageInactiveSessions, InactiveSessionManager>();
+builder.Services.AddScoped<IManageActiveSessions, ActiveSessionManager>();
+builder.Services.AddScoped<IManageActiveSessionCache, ActiveSessionCacher>();
+builder.Services.AddScoped<IManageRoundInfo, RoundInfoManager>();
 builder.Services.AddScoped<IFetchAnswers, AnswerFetcher>();
+builder.Services.AddScoped<IDoGameTicks, GameTickProcessor>();
 
 var app = builder.Build();
 

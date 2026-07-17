@@ -1,5 +1,4 @@
 ﻿using WikiGuessrAPI.Models;
-using WikiGuessrAPI.Models.DTO;
 using WikiGuessrAPI.Models.Exceptions;
 using WikiGuessrAPI.Services.Interfaces;
 
@@ -27,7 +26,7 @@ public class InactiveSessionManager(
             throw new SessionIsFullException(sessionId, playerId);
         }
 
-        await redisCache.AddPlayerToSession(sessionId, playerId, playerName);
+        await redisCache.AddPlayerToSessionAsync(sessionId, playerId, playerName);
 
         return playerId;
     }
@@ -85,7 +84,7 @@ public class InactiveSessionManager(
     {
         LoggingEvents.LogKickPlayer(logger, playerId, sessionId);
 
-        await redisCache.RemovePlayerFromSession(sessionId, playerId);
+        await redisCache.RemovePlayerFromSessionAsync(sessionId, playerId);
     }
 
     public async Task DeleteSessionIfHostAsync(Guid sessionId, Guid hostId)
@@ -118,10 +117,10 @@ public class InactiveSessionManager(
             throw new PlayerNotInSessionException(sessionId, playerName);
         }
 
-        await redisCache.RemovePlayerFromSession(sessionId, playerToRemove);
+        await redisCache.RemovePlayerFromSessionAsync(sessionId, playerToRemove);
     }
 
-    public Task<IEnumerable<SessionDTO>> GetInactiveSessionsAsync() => throw new NotImplementedException();
+    public async Task<IEnumerable<Session>> GetAllInactiveSessionsAsync() => await redisCache.GetAllInactiveSessionsAsync();
 
-    public Task SetTTL(int seconds, Guid sessionId) => throw new NotImplementedException();
+    public async Task SetSessionTTLAsync(Guid sessionId, int seconds) => await redisCache.SetSessionTTLInSecondsAsync(sessionId, seconds);
 }
