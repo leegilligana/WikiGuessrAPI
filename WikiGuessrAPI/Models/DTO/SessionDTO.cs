@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace WikiGuessrAPI.Models.DTO;
+﻿namespace WikiGuessrAPI.Models.DTO;
 
 public class SessionDTO(Guid id, int round, int roundLimit, Dictionary<string, int> playerScores)
 {
@@ -20,8 +18,6 @@ public class SessionDTO(Guid id, int round, int roundLimit, Dictionary<string, i
             session.RoundLimit,
             session.PlayerNames.ToDictionary(
                 kvp => kvp.Value,
-                kvp => session.PlayerScores.GetValueOrDefault(kvp.Key, 0)
-            )
-        );
+                kvp => session.PlayerScores.GetValueOrDefault(kvp.Key, 0)));
     }
 }

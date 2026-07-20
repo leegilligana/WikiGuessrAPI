@@ -4,6 +4,9 @@
 public class SessionNotFoundException(Guid sessionId)
     : Exception($"Session not found for id: {sessionId}");
 
+public class SessionListNotFoundException()
+    : Exception("Failed to retrieve sessions");
+
 public class SessionIsFullException(Guid sessionId, Guid playerId)
     : Exception($"Session full. Player with id: {playerId} failed to join session with id: {sessionId}");
 

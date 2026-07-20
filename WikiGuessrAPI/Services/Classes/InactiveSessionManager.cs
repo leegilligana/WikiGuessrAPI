@@ -55,8 +55,10 @@ public class InactiveSessionManager(
             {
                 { hostGuid, hostPlayerName },
             },
-            Round = 0,
+            Round = -1,
+            Hint = 0,
             RoundLimit = numberOfQuestions,
+            UpdateDue = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 99999,
         };
 
         await redisCache.AddSessionToCacheAsync(session);

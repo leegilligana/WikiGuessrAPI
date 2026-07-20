@@ -11,7 +11,7 @@ using Xunit;
 
 namespace WikiGuessrAPITests.E2E;
 
-public class GameSessionTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class InactiveGameSessionTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> factory = factory.WithWebHostBuilder(builder =>
         {

@@ -10,6 +10,7 @@ public class ExceptionHandler : IExceptionHandler
     [
         typeof(SessionNotFoundException),
         typeof(PlayerNotInSessionException),
+        typeof(SessionListNotFoundException),
     ];
 
     private static readonly List<Type> ForbiddenExceptions =

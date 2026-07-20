@@ -5,6 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "Tests", Scope = "member", Target = "~M:WikiGuessrAPITests.E2E.GameSessionTests.FetchSessionTest(System.Boolean)~System.Threading.Tasks.Task")]
-[assembly: SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "Tests", Scope = "member", Target = "~M:WikiGuessrAPITests.E2E.GameSessionTests.DeleteSessionTest~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "Tests", Scope = "member", Target = "~M:WikiGuessrAPITests.E2E.InactiveGameSessionTests.FetchSessionTest(System.Boolean)~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "Tests", Scope = "member", Target = "~M:WikiGuessrAPITests.E2E.InactiveGameSessionTests.DeleteSessionTest~System.Threading.Tasks.Task")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Tests", Scope = "member", Target = "~M:WikiGuessrAPITests.Unit_Tests.Services.GameTickProcessingTests.TestEndSession~System.Threading.Tasks.Task")]
